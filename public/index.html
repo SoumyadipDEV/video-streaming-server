@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SoumyaBing 2.0</title>
+  <style>
+    /* General Reset and Styling */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #121212;
+      color: #f5f5f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+    }
+
+    h1 {
+      margin: 20px 0;
+      color: #ff4040;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-size: 2rem;
+    }
+
+    #video-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+      width: 90%;
+      max-width: 1200px;
+      margin-bottom: 30px;
+    }
+
+    .video-card {
+      background: linear-gradient(145deg, #1c1c1c, #292929);
+      border: 2px solid #ff4040;
+      border-radius: 10px;
+      text-align: center;
+      padding: 15px;
+      box-shadow: 0 5px 15px rgba(255, 64, 64, 0.5);
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .video-card:hover {
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 10px 25px rgba(255, 64, 64, 0.7);
+    }
+
+    .video-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #ff4040;
+      margin-top: 10px;
+      word-break: break-word;
+    }
+
+    .action-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    button {
+      background-color: #ff4040;
+      color: #f5f5f5;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 15px;
+      cursor: pointer;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #ff2020;
+      transform: scale(1.1);
+    }
+
+    #video-player {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1000;
+      background: #121212;
+      border: 2px solid #ff4040;
+      border-radius: 10px;
+      padding: 20px; /* Increased padding to avoid clipping buttons */
+      box-shadow: 0 10px 30px rgba(255, 64, 64, 0.7);
+      width: 90%;
+      max-width: 800px;
+      max-height: 80vh; /* Ensure there's room for controls */
+      overflow: hidden;
+      text-align: center;
+    }
+
+    #video-element {
+      width: 100%;
+      height: auto;
+      max-height: 60vh; /* Limit the video height to avoid overflow */
+      object-fit: contain; /* Ensure the video scales without cutting off */
+      margin-bottom: 20px; /* Add some margin to separate from the buttons */
+    }
+
+    #close-player {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: #ff4040;
+      border: none;
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #close-player:hover {
+      background-color: #ff2020;
+    }
+  </style>
+</head>
+<body>
+  <h1>My Personal Streaming Site</h1>
+  <br>
+  <p2>Developed & Maintained by Soumyadip Banerjee</p2>
+  <br>
+  <br>
+  <div id="video-list"></div>
+
+  <!-- Video Player Modal -->
+  <div id="video-player">
+    <button id="close-player">&times;</button>
+    <h3 id="video-title"></h3>
+    <video id="video-element" controls></video>
+  </div>
+
+  <script>
+    const videoListContainer = document.getElementById('video-list');
+    const videoPlayer = document.getElementById('video-player');
+    const videoTitle = document.getElementById('video-title');
+    const videoElement = document.getElementById('video-element');
+    const closePlayerButton = document.getElementById('close-player');
+
+    // Fetch the video list
+    async function fetchVideos() {
+      try {
+        const response = await fetch('/videos');
+        if (!response.ok) throw new Error('Failed to fetch videos');
+        const videos = await response.json();
+
+        videoListContainer.innerHTML = '';
+        videos.forEach(video => {
+          const videoCard = document.createElement('div');
+          videoCard.className = 'video-card';
+          videoCard.innerHTML = `
+            <div class="video-title">${video}</div>
+            <div class="action-buttons">
+              <button onclick="downloadVideo('${video}')">Download</button>
+              <button onclick="playOrResumeVideo('${video}')">Play</button>
+            </div>
+          `;
+          videoListContainer.appendChild(videoCard);
+        });
+      } catch (error) {
+        console.error(error);
+        videoListContainer.innerHTML = '<p>Error loading videos. Please try again later.</p>';
+      }
+    }
+
+    // Play or resume video
+    async function playOrResumeVideo(video) {
+      try {
+        const response = await fetch(`/get-playback/${video}`);
+        if (!response.ok) throw new Error('Failed to fetch playback position');
+        const data = await response.json();
+        const playbackPosition = data.position || 0;
+
+        videoTitle.textContent = video;
+        videoElement.src = `/stream/${video}`;
+        videoElement.currentTime = playbackPosition;
+        videoElement.play();
+        videoPlayer.style.display = 'block';
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    // Save playback position and close player
+    closePlayerButton.addEventListener('click', async () => {
+      const video = videoTitle.textContent;
+      const position = videoElement.currentTime;
+      try {
+        await fetch('/save-playback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ video, position })
+        });
+      } catch (error) {
+        console.error('Error saving playback position:', error);
+      }
+      videoPlayer.style.display = 'none';
+      videoElement.pause();
+    });
+
+    // Download video
+    function downloadVideo(video) {
+      const link = document.createElement('a');
+      link.href = `/download/${video}`;
+      link.download = video;
+      link.click();
+    }
+
+    // Fetch videos initially
+    fetchVideos();
+  </script>
+</body>
+</html>

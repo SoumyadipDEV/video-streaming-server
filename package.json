@@ -1,0 +1,21 @@
+{
+  "name": "video-streaming-server",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "compression": "^1.7.5",
+    "express": "^4.21.2",
+    "fs": "^0.0.1-security",
+    "mime": "^2.6.0",
+    "mime-types": "^2.1.35",
+    "path": "^0.12.7",
+    "range-parser": "^1.2.1"
+  }
+}
