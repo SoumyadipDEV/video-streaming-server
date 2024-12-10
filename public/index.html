@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SoumyaBing 2.0</title>
   <style>
     /* General Reset and Styling */
@@ -13,7 +14,7 @@
     }
 
     body {
-      font-family: 'Arial', sans-serif;
+      font-family: "Arial", sans-serif;
       background-color: #121212;
       color: #f5f5f5;
       display: flex;
@@ -99,11 +100,13 @@
       background: #121212;
       border: 2px solid #ff4040;
       border-radius: 10px;
-      padding: 20px; /* Increased padding to avoid clipping buttons */
+      padding: 20px;
+      /* Increased padding to avoid clipping buttons */
       box-shadow: 0 10px 30px rgba(255, 64, 64, 0.7);
       width: 90%;
       max-width: 800px;
-      max-height: 80vh; /* Ensure there's room for controls */
+      max-height: 80vh;
+      /* Ensure there's room for controls */
       overflow: hidden;
       text-align: center;
     }
@@ -111,9 +114,12 @@
     #video-element {
       width: 100%;
       height: auto;
-      max-height: 60vh; /* Limit the video height to avoid overflow */
-      object-fit: contain; /* Ensure the video scales without cutting off */
-      margin-bottom: 20px; /* Add some margin to separate from the buttons */
+      max-height: 60vh;
+      /* Limit the video height to avoid overflow */
+      object-fit: contain;
+      /* Ensure the video scales without cutting off */
+      margin-bottom: 20px;
+      /* Add some margin to separate from the buttons */
     }
 
     #close-player {
@@ -138,12 +144,13 @@
     }
   </style>
 </head>
+
 <body>
   <h1>My Personal Streaming Site</h1>
-  <br>
+  <br />
   <p2>Developed & Maintained by Soumyadip Banerjee</p2>
-  <br>
-  <br>
+  <br />
+  <br />
   <div id="video-list"></div>
 
   <!-- Video Player Modal -->
@@ -154,35 +161,36 @@
   </div>
 
   <script>
-    const videoListContainer = document.getElementById('video-list');
-    const videoPlayer = document.getElementById('video-player');
-    const videoTitle = document.getElementById('video-title');
-    const videoElement = document.getElementById('video-element');
-    const closePlayerButton = document.getElementById('close-player');
+    const videoListContainer = document.getElementById("video-list");
+    const videoPlayer = document.getElementById("video-player");
+    const videoTitle = document.getElementById("video-title");
+    const videoElement = document.getElementById("video-element");
+    const closePlayerButton = document.getElementById("close-player");
 
     // Fetch the video list
     async function fetchVideos() {
       try {
-        const response = await fetch('/videos');
-        if (!response.ok) throw new Error('Failed to fetch videos');
+        const response = await fetch("/videos");
+        if (!response.ok) throw new Error("Failed to fetch videos");
         const videos = await response.json();
 
-        videoListContainer.innerHTML = '';
-        videos.forEach(video => {
-          const videoCard = document.createElement('div');
-          videoCard.className = 'video-card';
+        videoListContainer.innerHTML = "";
+        videos.forEach((video) => {
+          const videoCard = document.createElement("div");
+          videoCard.className = "video-card";
           videoCard.innerHTML = `
-            <div class="video-title">${video}</div>
-            <div class="action-buttons">
-              <button onclick="downloadVideo('${video}')">Download</button>
-              <button onclick="playOrResumeVideo('${video}')">Play</button>
-            </div>
-          `;
+    <div class="video-title">${video.original}</div> <!-- Accessing the original property -->
+    <div class="action-buttons">
+      <button onclick="downloadVideo('${video.original}')">Download</button>
+      <button onclick="playOrResumeVideo('${video.original}')">Play</button>
+    </div>
+  `;
           videoListContainer.appendChild(videoCard);
         });
       } catch (error) {
         console.error(error);
-        videoListContainer.innerHTML = '<p>Error loading videos. Please try again later.</p>';
+        videoListContainer.innerHTML =
+          "<p>Error loading videos. Please try again later.</p>";
       }
     }
 
@@ -190,7 +198,8 @@
     async function playOrResumeVideo(video) {
       try {
         const response = await fetch(`/get-playback/${video}`);
-        if (!response.ok) throw new Error('Failed to fetch playback position');
+        if (!response.ok)
+          throw new Error("Failed to fetch playback position");
         const data = await response.json();
         const playbackPosition = data.position || 0;
 
@@ -198,32 +207,32 @@
         videoElement.src = `/stream/${video}`;
         videoElement.currentTime = playbackPosition;
         videoElement.play();
-        videoPlayer.style.display = 'block';
+        videoPlayer.style.display = "block";
       } catch (error) {
         console.error(error);
       }
     }
 
     // Save playback position and close player
-    closePlayerButton.addEventListener('click', async () => {
+    closePlayerButton.addEventListener("click", async () => {
       const video = videoTitle.textContent;
       const position = videoElement.currentTime;
       try {
-        await fetch('/save-playback', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ video, position })
+        await fetch("/save-playback", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ video, position }),
         });
       } catch (error) {
-        console.error('Error saving playback position:', error);
+        console.error("Error saving playback position:", error);
       }
-      videoPlayer.style.display = 'none';
+      videoPlayer.style.display = "none";
       videoElement.pause();
     });
 
     // Download video
     function downloadVideo(video) {
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = `/download/${video}`;
       link.download = video;
       link.click();
@@ -233,4 +242,5 @@
     fetchVideos();
   </script>
 </body>
+
 </html>

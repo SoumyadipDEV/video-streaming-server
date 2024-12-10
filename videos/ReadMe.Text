@@ -1,0 +1,8 @@
+Add your local video files to this folder
+
+Run server >> nmp server.js
+
+See the magic
+
+if not running, install enviornment >> npm install express mime-types range-parser compression
+
